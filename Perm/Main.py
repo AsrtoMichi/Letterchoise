@@ -44,7 +44,7 @@ def forest_maker(words: Iterable[str]) -> Dict[str, list]:
     len_index = ceil(log2(len(words)))
 
     letters = {char for char, count in Counter(
-        "".join(["".join(set(word.lower())) for word in words])).items() if 2**(len_index - 1) <= count <= 2**len_index}
+        "".join(["".join(set(word.lower())) for word in words])).items() if 2**(len_index - 1) <= count < 2**len_index}
 
     if len(letters) < len_index:
         return None
