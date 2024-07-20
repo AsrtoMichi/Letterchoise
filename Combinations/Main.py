@@ -2,6 +2,7 @@ from collections import Counter
 from itertools import combinations
 from typing import Iterable, Dict
 from math import log2, ceil
+import unittest
 
 
 def bare_tree_maker(choise: int) -> list:
@@ -34,29 +35,30 @@ def tree_maker(words: Iterable[str], index: str, len_index: int, range_index: ra
         if len(sublist) == 0:
             sublist.append(word)
         else:
+            # sublist.append(word)
             return None
-        
+
     return tree
 
 
 def forest_maker(words: Iterable[str]) -> Dict[str, list]:
+    """
+    T
+    """
 
     len_index = ceil(log2(len(words)))
+    range_index = range(len_index)
 
-    letters = {char for char, count in Counter(
-        "".join(["".join(set(word.lower())) for word in words])).items() if 2**(len_index - 1) <= count < 2**len_index}
+    letters = {char for char, count in Counter(char for word in words for char in {
+                                               *word.lower()}).items() if 2**len_index/4 <= count <= 2**len_index/2}
 
     if len(letters) < len_index:
-        return None
-
-    indexes = {''.join(perm) for perm in combinations(
-        letters, len_index)}
-
-    range_index = range(len_index)
+        return {}
 
     combinations_list = {}
 
-    for index in indexes:
+    for index in combinations(letters, len_index):
+
         tree = tree_maker(words, index, len_index, range_index)
         if tree:
             combinations_list[index] = tree
@@ -64,25 +66,25 @@ def forest_maker(words: Iterable[str]) -> Dict[str, list]:
     return combinations_list
 
 
-def test():
-    print("Test bare_tree_maker()")
-    print("bare_tree_maker(1) == [[], []]:", bare_tree_maker(1) == [[], []])
-    print("bare_tree_maker(1) == [[], []]:",
-          bare_tree_maker(2) == [[[], []], [[], []]])
+class Test(unittest.TestCase):
 
-    print("\nTest tree_maker()")
-    print("tree_maker(['Ann', 'Bob'], 'b', 1, range(1)) == [['Ann'], ['Bob']]:", [
-          "Ann", "Bob"], tree_maker(['Ann', 'Bob'], "b", 1, range(1)) == [['Ann'], ['Bob']])
+    def test_bare_tree_maker(self):
+        self.assertEqual(bare_tree_maker(1), [[], []])
+        self.assertEqual(bare_tree_maker(2), [[[], []], [[], []]])
 
-    print("\nTest forest_maker()")
-    print("forest_maker(['Ann', 'Bob']) == {'o': [['Ann'], ['Bob']], 'n': [['Bob'], ['Ann']], 'b': [['Ann'], ['Bob']], 'a': [['Bob'], ['Ann']]}:", forest_maker(
-        ['Ann', 'Bob']) == {'o': [['Ann'], ['Bob']], 'n': [['Bob'], ['Ann']], 'b': [['Ann'], ['Bob']], 'a': [['Bob'], ['Ann']]})
+    def test_tree_maker(self):
+        self.assertEqual(tree_maker(['Ann', 'Bob'], "b", 1, range(1)), [
+                         ['Ann'], ['Bob']])
+
+    def test_forest_maker(self):
+        self.assertEqual(forest_maker(['Ann', 'Bob']), {('b',): [['Ann'], ['Bob']], ('n',): [
+                         ['Bob'], ['Ann']], ('o',): [['Ann'], ['Bob']], ('a',): [['Bob'], ['Ann']]})
 
 
 if __name__ == "__main__":
 
-    # test()
+    # unittest.main()
 
-    words = ["apple", "banana", "cherry", "blueberry"]
+    words = ["apple", "banana", "cherry"]
 
     print(forest_maker(words))
